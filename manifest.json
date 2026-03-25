@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "React Component Inspector for AI",
+  "version": "1.0.0",
+  "description": "Click any React element to inspect its component tree and copy AI-friendly context for Claude Code, Cursor, and other AI assistants.",
+  "permissions": ["activeTab"],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    },
+    "default_title": "React Component Inspector"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"],
+      "css": ["panel.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["page-script.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    }
+  ]
+}
