@@ -93,6 +93,65 @@
   margin-right: 4px;
 }
 
+/* File path section */
+#rci-path-section {
+  padding: 8px 14px;
+  border-bottom: 1px solid #313244;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 11px;
+  color: #A6E3A1;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.rci-path-icon {
+  margin-right: 4px;
+}
+
+.rci-path-loading {
+  color: #585B70;
+  font-style: italic;
+  animation: rci-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes rci-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Props section */
+#rci-props-section {
+  padding: 6px 14px;
+  border-bottom: 1px solid #313244;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.rci-prop-item {
+  font-size: 11px;
+  padding: 2px 0;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.rci-prop-key {
+  color: #CBA6F7;
+}
+
+.rci-prop-eq {
+  color: #585B70;
+  margin: 0 3px;
+}
+
+.rci-prop-val {
+  color: #F9E2AF;
+}
+
+/* Loading indicator */
+#rci-panel-loading {
+  font-size: 12px;
+  margin-left: 6px;
+}
+
 /* Copy button section */
 #rci-action-section {
   padding: 8px 14px;

@@ -22,9 +22,12 @@
     panel.innerHTML = `
       <div id="rci-panel-header">
         <span id="rci-panel-title">React Inspector</span>
+        <span id="rci-panel-loading"></span>
         <button id="rci-panel-close">&times;</button>
       </div>
       <div id="rci-tree-section"></div>
+      <div id="rci-props-section"></div>
+      <div id="rci-path-section"></div>
       <div id="rci-action-section">
         <button id="rci-copy-btn">복사</button>
       </div>
@@ -62,18 +65,44 @@
       el.className = 'rci-tree-item' + (i === selectedIndex ? ' selected' : '');
 
       const indent = '<span class="rci-tree-indent">' + '  '.repeat(i) + (i > 0 ? '> ' : '') + '</span>';
-      const path = item.sourcePath || item.fileName;
-      const fileHint = path ? ` <span style="color:#585B70;font-size:11px">(${path})</span>` : '';
-      el.innerHTML = indent + item.name + fileHint;
+      el.innerHTML = indent + item.name;
 
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         selectedTreeIndex = i;
         renderTree(tree, i);
+        renderDetails(tree[i]);
       });
 
       section.appendChild(el);
     });
+  }
+
+  function renderDetails(item) {
+    renderPath(item);
+    renderProps(item);
+  }
+
+  function renderPath(item) {
+    const section = panel.querySelector('#rci-path-section');
+    const path = item.sourcePath || item.fileName;
+    section.innerHTML = path
+      ? `<span class="rci-path-icon">📁</span> ${path}`
+      : `<span class="rci-path-icon">📁</span> ${item.fileName} <span class="rci-path-loading">resolving...</span>`;
+  }
+
+  function renderProps(item) {
+    const section = panel.querySelector('#rci-props-section');
+    if (!item.props || Object.keys(item.props).length === 0) {
+      section.innerHTML = '';
+      return;
+    }
+    let html = '';
+    for (const [key, val] of Object.entries(item.props)) {
+      const valStr = typeof val === 'string' ? `"${val}"` : String(val);
+      html += `<div class="rci-prop-item"><span class="rci-prop-key">${key}</span><span class="rci-prop-eq">=</span><span class="rci-prop-val">${valStr}</span></div>`;
+    }
+    section.innerHTML = html;
   }
 
   function positionPanel(x, y) {
@@ -94,13 +123,18 @@
     panel.style.top = top + 'px';
   }
 
-  function showPanel(tree, clickX, clickY) {
+  function showPanel(tree, clickX, clickY, resolving) {
     if (tree.length === 0) return;
 
     currentTree = tree;
     selectedTreeIndex = tree.length - 1;
 
+    // Show/hide loading indicator
+    const loading = panel.querySelector('#rci-panel-loading');
+    if (loading) loading.textContent = resolving ? '⏳' : '';
+
     renderTree(tree, selectedTreeIndex);
+    renderDetails(tree[selectedTreeIndex]);
     positionPanel(clickX, clickY);
   }
 
@@ -116,6 +150,7 @@
     const treePath = currentTree.map((item) => item.name).join(' > ');
     const selected = currentTree[selectedTreeIndex];
     const filePath = selected.sourcePath || selected.fileName || `${selected.name}.tsx`;
+
     const text = `컴포넌트: ${treePath}\n파일: ${filePath}`;
 
     navigator.clipboard.writeText(text).then(() => {
@@ -221,7 +256,17 @@
       }
 
       const click = panel._pendingClick || { x: 200, y: 200 };
-      showPanel(payload.tree, click.x, click.y);
+      showPanel(payload.tree, click.x, click.y, payload.resolving);
+    }
+
+    if (type === 'RCI_INSPECT_RESOLVED') {
+      // Source maps resolved — update tree with real paths
+      currentTree = payload.tree;
+      const loading = panel.querySelector('#rci-panel-loading');
+      if (loading) loading.textContent = '';
+
+      renderTree(currentTree, selectedTreeIndex);
+      renderDetails(currentTree[selectedTreeIndex]);
     }
   });
 
