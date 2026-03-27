@@ -7,6 +7,7 @@
   let warningEl = null;
   let selectedTreeIndex = -1;
   let currentTree = [];
+  let currentElementHtml = '';
 
   // ─── DOM Setup ───
 
@@ -26,8 +27,8 @@
         <button id="rci-panel-close">&times;</button>
       </div>
       <div id="rci-tree-section"></div>
-      <div id="rci-props-section"></div>
       <div id="rci-path-section"></div>
+      <div id="rci-element-section"></div>
       <div id="rci-action-section">
         <button id="rci-copy-btn">복사</button>
       </div>
@@ -80,29 +81,27 @@
 
   function renderDetails(item) {
     renderPath(item);
-    renderProps(item);
+    renderElementHtml();
   }
 
   function renderPath(item) {
     const section = panel.querySelector('#rci-path-section');
     const path = item.sourcePath || item.fileName;
-    section.innerHTML = path
-      ? `<span class="rci-path-icon">📁</span> ${path}`
-      : `<span class="rci-path-icon">📁</span> ${item.fileName} <span class="rci-path-loading">resolving...</span>`;
+    section.innerHTML = `<span class="rci-path-icon">📁</span> ${path}`;
   }
 
-  function renderProps(item) {
-    const section = panel.querySelector('#rci-props-section');
-    if (!item.props || Object.keys(item.props).length === 0) {
+  function renderElementHtml() {
+    const section = panel.querySelector('#rci-element-section');
+    if (!currentElementHtml) {
       section.innerHTML = '';
       return;
     }
-    let html = '';
-    for (const [key, val] of Object.entries(item.props)) {
-      const valStr = typeof val === 'string' ? `"${val}"` : String(val);
-      html += `<div class="rci-prop-item"><span class="rci-prop-key">${key}</span><span class="rci-prop-eq">=</span><span class="rci-prop-val">${valStr}</span></div>`;
-    }
-    section.innerHTML = html;
+    // Escape HTML for display
+    const escaped = currentElementHtml
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    section.innerHTML = `<pre class="rci-element-code">${escaped}</pre>`;
   }
 
   function positionPanel(x, y) {
@@ -151,7 +150,10 @@
     const selected = currentTree[selectedTreeIndex];
     const filePath = selected.sourcePath || selected.fileName || `${selected.name}.tsx`;
 
-    const text = `컴포넌트: ${treePath}\n파일: ${filePath}`;
+    let text = `컴포넌트: ${treePath}\n파일: ${filePath}`;
+    if (currentElementHtml) {
+      text += `\n요소:\n${currentElementHtml}`;
+    }
 
     navigator.clipboard.writeText(text).then(() => {
       const btn = panel.querySelector('#rci-copy-btn');
@@ -255,6 +257,7 @@
         return;
       }
 
+      currentElementHtml = payload.elementHtml || '';
       const click = panel._pendingClick || { x: 200, y: 200 };
       showPanel(payload.tree, click.x, click.y, payload.resolving);
     }

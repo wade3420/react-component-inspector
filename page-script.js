@@ -262,6 +262,21 @@
 
     if (type === 'RCI_INSPECT_ELEMENT') {
       const el = document.elementFromPoint(payload.x, payload.y);
+      // Capture element HTML (truncated)
+      let elementHtml = '';
+      if (el) {
+        try {
+          const html = el.outerHTML;
+          if (html.length > 500) {
+            // Keep opening tag + truncated inner
+            const tagEnd = html.indexOf('>') + 1;
+            const closingTag = html.slice(html.lastIndexOf('</'));
+            elementHtml = html.slice(0, Math.min(460 - closingTag.length, html.length)) + '...' + closingTag;
+          } else {
+            elementHtml = html;
+          }
+        } catch { /* skip */ }
+      }
       if (!el) {
         window.postMessage({
           source: RCI_ID,
@@ -287,7 +302,7 @@
       window.postMessage({
         source: RCI_ID,
         type: 'RCI_INSPECT_RESULT',
-        payload: { success: true, tree: resolvedTree, resolving: false },
+        payload: { success: true, tree: resolvedTree, elementHtml, resolving: false },
       });
     }
 

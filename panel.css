@@ -119,31 +119,22 @@
   50% { opacity: 1; }
 }
 
-/* Props section */
-#rci-props-section {
+/* Element HTML section */
+#rci-element-section {
   padding: 6px 14px;
   border-bottom: 1px solid #313244;
-  max-height: 120px;
-  overflow-y: auto;
+  max-height: 150px;
+  overflow: auto;
 }
 
-.rci-prop-item {
-  font-size: 11px;
-  padding: 2px 0;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-}
-
-.rci-prop-key {
-  color: #CBA6F7;
-}
-
-.rci-prop-eq {
-  color: #585B70;
-  margin: 0 3px;
-}
-
-.rci-prop-val {
-  color: #F9E2AF;
+.rci-element-code {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 10px;
+  color: #A6ADC8;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+  line-height: 1.4;
 }
 
 /* Loading indicator */
